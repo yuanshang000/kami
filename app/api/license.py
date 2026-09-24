@@ -80,7 +80,7 @@ def verify_license(
     user_agent = request.headers.get("User-Agent", "")
 
     try:
-        lic = license_service.verify_license(db, body.license_key, product_id)
+        lic = license_service.verify_license(db, body.license_key, product_id, machine_id=body.machine_id, force=body.force)
     except LicenseError as e:
         _log_usage(db, lic_id=None, product_id=product_id, ip=ip, body=body,
                    client_version=client_version, user_agent=user_agent,

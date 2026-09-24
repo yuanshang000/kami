@@ -57,6 +57,7 @@ class License(Base):
     status = Column(String(16), nullable=False, default="UNUSED", index=True)
     # UNUSED | ACTIVE | EXPIRED | DISABLED
     remark = Column(String(255), nullable=True)
+    bind_machine = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime(timezone=True), nullable=False, default=_utcnow)
     activated_at = Column(DateTime(timezone=True), nullable=True)
     expire_at = Column(DateTime(timezone=True), nullable=True)

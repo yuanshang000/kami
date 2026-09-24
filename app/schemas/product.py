@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 
 class ProductCreate(BaseModel):
-    product_id: str = Field(..., min_length=1, max_length=64, pattern="^[a-zA-Z0-9_-]+$")
+    product_id: str = Field(..., min_length=1, max_length=64, pattern=r"^[\w\u4e00-\u9fff\u3400-\u4dbf-]+$")
     product_name: str = Field(..., min_length=1, max_length=128)
     description: Optional[str] = Field(None, max_length=1024)
 

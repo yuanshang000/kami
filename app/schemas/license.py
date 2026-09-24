@@ -10,6 +10,7 @@ class LicenseVerifyRequest(BaseModel):
     license_key: str = Field(..., min_length=8, max_length=255)
     machine_id: Optional[str] = Field(None, max_length=255)
     client_version: Optional[str] = Field(None, max_length=64)
+    force: bool = Field(False, description="是否强制顶号（踢出已有机器）")
 
 
 class LicenseActivateRequest(BaseModel):
@@ -68,6 +69,7 @@ class BatchGenerateRequest(BaseModel):
     duration: int = Field(..., ge=1, le=100000)
     duration_unit: str = Field("minute", pattern="^(minute|hour|day)$")
     remark: Optional[str] = Field(None, max_length=255)
+    bind_machine: bool = Field(False, description="是否单机绑定")
 
     @field_validator("duration_unit")
     @classmethod

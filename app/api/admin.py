@@ -33,6 +33,7 @@ def _to_out(lic: License) -> dict:
         "duration_unit": lic.duration_unit,
         "status": lic.status,
         "remark": lic.remark,
+        "bind_machine": lic.bind_machine,
         "created_at": to_iso8601(lic.created_at),
         "activated_at": to_iso8601(lic.activated_at),
         "expire_at": to_iso8601(lic.expire_at),
@@ -55,6 +56,7 @@ def list_licenses(
 ):
     st = from_iso8601(start_time) if start_time else None
     en = from_iso8601(end_time) if end_time else None
+    license_service.auto_expire(db)
     items, total = license_service.query_licenses(
         db, product_id=product_id, status=status, keyword=keyword,
         page=page, page_size=page_size, start_time=st, end_time=en,
@@ -78,6 +80,7 @@ def batch_generate(
         duration=body.duration,
         duration_unit=body.duration_unit,
         remark=body.remark,
+        bind_machine=body.bind_machine,
     )
     admin_log_service.record_admin_action(
         db, admin_id=admin.id, admin_username=admin.username,
@@ -304,9 +307,18 @@ def export_licenses(
     fmt = body.get("format", "txt")
     product_id = body.get("product_id")
     status = body.get("status")
-    items, _ = license_service.query_licenses(
-        db, product_id=product_id, status=status, page=1, page_size=100000
-    )
+    license_ids = body.get("license_ids")
+    if license_ids:
+        items = (
+            db.query(License)
+            .filter(License.license_id.in_(license_ids))
+            .order_by(License.id.desc())
+            .all()
+        )
+    else:
+        items, _ = license_service.query_licenses(
+            db, product_id=product_id, status=status, page=1, page_size=100000
+        )
     keys = [l.license_key for l in items]
     if fmt == "csv":
         lines = ["license_key,license_id,product_id,status,duration,duration_unit,created_at,expire_at"]

@@ -11,7 +11,21 @@ from app.models import AdminUser, Base
 
 def init_database() -> None:
     Base.metadata.create_all(bind=engine)
+    _migrate_add_bind_machine()
     _ensure_default_admin()
+
+
+def _migrate_add_bind_machine() -> None:
+    """为已有 licenses 表添加 bind_machine 列（如果不存在）。"""
+    from sqlalchemy import text, inspect
+    inspector = inspect(engine)
+    if "licenses" not in inspector.get_table_names():
+        return
+    columns = [c["name"] for c in inspector.get_columns("licenses")]
+    if "bind_machine" not in columns:
+        with engine.connect() as conn:
+            conn.execute(text("ALTER TABLE licenses ADD COLUMN bind_machine BOOLEAN NOT NULL DEFAULT 0"))
+            conn.commit()
 
 
 def _ensure_default_admin() -> None:

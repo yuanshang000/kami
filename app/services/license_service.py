@@ -9,7 +9,43 @@ from sqlalchemy.orm import Session
 from app.core.errors import ErrorCode, LicenseError
 from app.core.security import generate_license_id, generate_license_key
 from app.core.time_utils import compute_expiry, ensure_aware, extend_expiry, utc_now
-from app.models import License, Product
+from app.models import License, Product, Session as SessionModel
+
+
+# ---------------------------------------------------------------------------
+# 自动过期处理
+# ---------------------------------------------------------------------------
+
+def auto_expire(db: Session) -> int:
+    """扫描已过期的 ACTIVE 卡密和活跃会话，自动更新状态并撤销会话。返回过期卡密数量。"""
+    now = utc_now()
+    expired_licenses = db.query(License).filter(
+        License.status == "ACTIVE",
+        License.expire_at.isnot(None),
+        License.expire_at < now,
+    ).all()
+    count = 0
+    for lic in expired_licenses:
+        lic.status = "EXPIRED"
+        _revoke_all_sessions(db, lic.license_id)
+        count += 1
+    expired_sessions = db.query(SessionModel).filter(
+        SessionModel.status == "active",
+        SessionModel.expire_at < now,
+    ).all()
+    for s in expired_sessions:
+        s.status = "expired"
+    if count or expired_sessions:
+        db.commit()
+    return count
+
+
+def _revoke_all_sessions(db: Session, license_id: str) -> int:
+    """撤销指定卡密下的所有活跃会话。"""
+    sessions = db.query(SessionModel).filter_by(license_id=license_id, status="active").all()
+    for s in sessions:
+        s.status = "revoked"
+    return len(sessions)
 
 
 # ---------------------------------------------------------------------------
@@ -44,6 +80,7 @@ def batch_generate(
     duration: int,
     duration_unit: str,
     remark: Optional[str] = None,
+    bind_machine: bool = False,
 ) -> list[License]:
     product = get_product_by_id(db, product_id)
     if product is None:
@@ -63,6 +100,7 @@ def batch_generate(
             duration_unit=duration_unit,
             status="UNUSED",
             remark=remark,
+            bind_machine=bind_machine,
             created_at=now,
         )
         db.add(lic)
@@ -112,6 +150,8 @@ def verify_license(
     db: Session,
     license_key: str,
     product_id: str,
+    machine_id: Optional[str] = None,
+    force: bool = False,
 ) -> License:
     lic = get_license_by_key(db, license_key)
     if lic is None:
@@ -136,8 +176,25 @@ def verify_license(
     if lic.status == "ACTIVE":
         if lic.expire_at and now > ensure_aware(lic.expire_at):
             lic.status = "EXPIRED"
+            _revoke_all_sessions(db, lic.license_id)
             db.commit()
             raise LicenseError(ErrorCode.LICENSE_EXPIRED)
+
+        if lic.bind_machine and machine_id:
+            existing = db.query(SessionModel).filter(
+                SessionModel.license_id == lic.license_id,
+                SessionModel.status == "active",
+            ).first()
+            if existing and existing.machine_id and existing.machine_id != machine_id:
+                if not force:
+                    db.commit()
+                    raise LicenseError(
+                        ErrorCode.INVALID_LICENSE,
+                        "该卡密已绑定其他设备，继续验证将顶替原有设备，是否确认？",
+                    )
+                existing.status = "revoked"
+                db.commit()
+
         db.commit()
         db.refresh(lic)
         return lic

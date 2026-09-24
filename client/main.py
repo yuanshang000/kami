@@ -90,8 +90,8 @@ class LicenseClient:
     def _url(self, path: str) -> str:
         return f"{self.server_url}/api/v1/license/{path}"
 
-    def verify(self, license_key: str) -> bool:
-        body = {"license_key": license_key, "machine_id": self.machine_id, "client_version": self.client_version}
+    def verify(self, license_key: str, force: bool = False) -> bool:
+        body = {"license_key": license_key, "machine_id": self.machine_id, "client_version": self.client_version, "force": force}
         resp = requests.post(self._url("verify"), headers=self.headers, json=body, timeout=10)
         print_resp(resp)
         if resp.ok and resp.json().get("success"):
@@ -100,6 +100,12 @@ class LicenseClient:
             self.session_token = d.get("session_token")
             self.license_key = license_key
             return True
+        if not force and resp.ok:
+            data = resp.json()
+            if data.get("code") == 4001 and "顶替" in data.get("message", ""):
+                choice = input("\n  该卡密已在其他设备使用，是否顶号？(y/N): ").strip().lower()
+                if choice == "y":
+                    return self.verify(license_key, force=True)
         return False
 
     def activate(self, license_key: str) -> bool:

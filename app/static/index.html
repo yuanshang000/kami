@@ -128,7 +128,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 table th{text-align:left;padding:12px 14px;background:linear-gradient(180deg,#f8fafc,#f1f5f9);color:var(--text2);font-weight:600;border-bottom:2px solid var(--border);white-space:nowrap;position:relative}
 table td{padding:11px 14px;border-bottom:1px solid #f1f5f9;white-space:nowrap;transition:background .15s}
 table tbody tr{transition:all .15s}
-table tbody tr:hover{background:linear-gradient(90deg,var(--primary-light),transparent);transform:translateX(2px)}
+table tbody tr:hover{background:linear-gradient(90deg,var(--primary-light),transparent)}
 table tbody tr:last-child td{border-bottom:none}
 table .checkbox-cell{width:44px}
 
@@ -207,6 +207,14 @@ table .checkbox-cell{width:44px}
 .checkbox{width:16px;height:16px;cursor:pointer;accent-color:var(--primary);transition:transform .15s}
 .checkbox:checked{transform:scale(1.15)}
 .table-actions{display:flex;gap:6px;flex-wrap:wrap}
+.ellipsis{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;cursor:help;position:relative}
+.ellipsis:hover{color:var(--primary)}
+.ellipsis-w-sm{max-width:120px}
+.ellipsis-w-md{max-width:180px}
+.ellipsis-w-lg{max-width:280px}
+.click-copy{cursor:pointer;transition:color .15s}
+.click-copy:hover{color:var(--primary)}
+.click-copy:active{color:var(--primary-dark)}
 .kv-list{display:flex;flex-direction:column;gap:10px}
 .kv-item{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:linear-gradient(90deg,#f8fafc,transparent);border-radius:var(--radius-sm);border-left:3px solid var(--primary);transition:all .2s}
 .kv-item:hover{background:linear-gradient(90deg,var(--primary-light),transparent);transform:translateX(2px)}
@@ -214,6 +222,76 @@ table .checkbox-cell{width:44px}
 
 /* Skeleton loading */
 .skeleton{background:linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%);background-size:200px 100%;animation:shimmer 1.5s infinite;border-radius:4px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-2-sm{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ===== Mobile / Tablet ===== */
+.sidebar-toggle{display:none;align-items:center;justify-content:center;font-size:22px;background:none;color:var(--text);padding:6px 10px;border-radius:var(--radius-sm);transition:background .2s;flex-shrink:0}
+.sidebar-toggle:hover{background:var(--primary-light)}
+.sidebar-toggle:active{background:var(--primary-light)}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99;backdrop-filter:blur(2px)}
+.sidebar-overlay.show{display:block;animation:fadeIn .2s ease}
+
+@media (max-width:1024px){
+  .sidebar{transform:translateX(-100%);transition:transform .3s cubic-bezier(.16,1,.3,1);box-shadow:none}
+  .sidebar.open{transform:translateX(0);box-shadow:4px 0 24px rgba(0,0,0,.15)}
+  .main{margin-left:0;min-height:auto}
+  .sidebar-toggle{display:flex}
+  .content{padding:20px;flex:none}
+  .app{min-height:auto}
+}
+
+@media (max-width:768px){
+  :root{--radius-lg:12px}
+  .content{padding:14px}
+  .header{height:52px;padding:0 14px}
+  .header .page-title{font-size:15px}
+  .header .page-title .title-bar{height:18px}
+  .header .user-info{padding:5px 8px}
+  .header .avatar{width:30px;height:30px;font-size:13px}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .stat-card{padding:14px}
+  .stat-card .stat-value{font-size:22px}
+  .stat-card .stat-icon{font-size:22px;right:12px;top:12px}
+  .stat-card .stat-label{font-size:12px}
+  .card{padding:14px;margin-bottom:14px}
+  .card-title{font-size:15px;margin-bottom:12px}
+  .filter-bar{flex-direction:column;align-items:stretch;gap:10px;padding:12px}
+  .filter-bar .form-group{min-width:0;width:100%}
+  .filter-bar .actions{justify-content:flex-end}
+  table{font-size:12px}
+  table th{padding:9px 10px}
+  table td{padding:8px 10px}
+  .modal{width:94vw;max-width:94vw;padding:18px;max-height:92vh}
+  .modal.wide{width:94vw;max-width:94vw}
+  .modal h3{font-size:16px;margin-bottom:16px}
+  .toast-container{top:10px;right:10px;left:10px}
+  .toast{max-width:none;font-size:13px;padding:12px 16px}
+  .form-row{flex-direction:column;gap:10px}
+  .form-group{min-width:0}
+  .pagination{flex-direction:column;gap:10px;align-items:stretch}
+  .pagination .page-btns{justify-content:center;flex-wrap:wrap}
+  .table-actions{gap:4px}
+  .btn{padding:7px 12px;font-size:12px}
+  .btn-sm{padding:4px 8px;font-size:11px}
+  .kv-item{padding:10px 12px}
+  .empty{padding:40px 16px}
+  .loading{padding:36px 16px}
+  .grid-2,.grid-2-sm{grid-template-columns:1fr;gap:14px}
+}
+
+@media (max-width:480px){
+  .stats-grid{grid-template-columns:1fr}
+  .login-card{width:92vw;padding:28px 22px}
+  .login-card h1{font-size:20px}
+  table th,table td{padding:6px 8px}
+  .mono{font-size:11px}
+  .copy-btn{font-size:11px;padding:1px 4px}
+  .header .user-info span:nth-child(2){display:none}
+  .sidebar{width:200px}
+  .sidebar .logo{padding:18px 16px;font-size:16px}
+  .sidebar nav a{padding:10px 16px;font-size:13px}
+}
 </style>
 </head>
 <body>
@@ -250,14 +328,17 @@ function toast(msg,type='info'){
   setTimeout(()=>{el.style.opacity='0';el.style.transform='translateX(100%)';setTimeout(()=>el.remove(),300)},3000);
 }
 
-function fmtDate(s){if(!s)return '-';return s.replace('T',' ').replace('Z','');}
+function fmtDate(s){if(!s)return '-';let d=new Date(s);if(isNaN(d.getTime()))return s;return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');}
 function fmtStatus(s){
   const m={UNUSED:['gray','未使用'],ACTIVE:['green','已激活'],EXPIRED:['orange','已过期'],DISABLED:['red','已禁用'],active:['green','活跃'],expired:['orange','过期'],revoked:['red','已撤销'],SUCCESS:['green','成功'],FAILED:['red','失败']};
   const v=m[s]||['gray',s];
   return `<span class="badge badge-${v[0]}">${v[1]}</span>`;
 }
 function escapeHtml(s){if(s==null)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function copyText(text){navigator.clipboard.writeText(text).then(()=>toast('已复制到剪贴板','success')).catch(()=>toast('复制失败','error'));}
+function fmtAction(a){const m={verify:'验证',activate:'激活',heartbeat:'心跳',deactivate:'注销',login:'登录',logout:'登出',change_password:'修改密码',create_product:'创建产品',update_product:'更新产品',regenerate_api_key:'重置API Key',batch_generate:'批量生成',batch_enable:'批量启用',batch_disable:'批量禁用',batch_extend:'批量续期',update_license:'更新卡密',delete_license:'删除卡密',extend_license:'续期卡密',disable_license:'禁用卡密',enable_license:'启用卡密'};return m[a]||a}
+function copyText(text,label){const msg=label?('已复制'+label):'已复制到剪贴板';if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(()=>toast(msg,'success')).catch(()=>fallbackCopy(text,msg));}else{fallbackCopy(text,msg);}}
+function fallbackCopy(text,msg){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast(msg,'success');}catch(e){toast('复制失败','error');}document.body.removeChild(ta);}
+function debounce(fn,ms=400){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}}
 function showLoading(){return `<div class="loading"><span class="spinner"></span><span class="loading-dots"><span></span><span></span><span></span></span> 加载中</div>`}
 function showEmpty(msg){return `<div class="empty"><div class="empty-icon">📭</div>${msg||'暂无数据'}</div>`}
 
@@ -273,6 +354,7 @@ const routes={
 };
 function navigate(hash){location.hash=hash;}
 function handleRoute(){
+  if(dashboardTimer){clearInterval(dashboardTimer);dashboardTimer=null}
   if(!token){renderLogin();return}
   let hash=location.hash.slice(1)||'dashboard';
   const route=routes[hash];
@@ -335,13 +417,15 @@ function renderLayout(activeHash){
   const route=routes[activeHash]||routes['dashboard'];
   document.getElementById('app').innerHTML=`
   <div class="app">
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
       <div class="logo"><div class="logo-icon">🔐</div>License Server</div>
-      <nav>${navHtml}</nav>
+      <nav id="navMenu">${navHtml}</nav>
       <div class="sidebar-footer"><span class="status-dot"></span>系统运行中 · v1.0.0</div>
     </div>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="main">
       <div class="header">
+        <button class="sidebar-toggle" id="sidebarToggle">☰</button>
         <div class="page-title"><span class="title-bar"></span>${route.title}</div>
         <div class="header-right">
           <div class="user-info" id="userInfo">
@@ -358,6 +442,12 @@ function renderLayout(activeHash){
       <div class="content" id="content">${showLoading()}</div>
     </div>
   </div>`;
+  const sidebar=document.getElementById('sidebar'),overlay=document.getElementById('sidebarOverlay');
+  function closeSidebar(){sidebar.classList.remove('open');overlay.classList.remove('show')}
+  function openSidebar(){sidebar.classList.add('open');overlay.classList.add('show')}
+  document.getElementById('sidebarToggle').onclick=()=>{sidebar.classList.contains('open')?closeSidebar():openSidebar()};
+  overlay.onclick=closeSidebar;
+  document.getElementById('navMenu').onclick=()=>{if(window.innerWidth<=1024)closeSidebar()};
   document.getElementById('userInfo').onclick=(e)=>{e.stopPropagation();document.getElementById('userDropdown').classList.toggle('hidden');};
   document.addEventListener('click',()=>document.getElementById('userDropdown')?.classList.add('hidden'));
   document.getElementById('logoutBtn').onclick=async()=>{
@@ -370,9 +460,11 @@ function renderLayout(activeHash){
 }
 
 /* ===================== Dashboard ===================== */
+let dashboardTimer=null;
 async function renderDashboard(){
   const c=document.getElementById('content');
-  try{
+  async function loadDashboard(){
+    try{
     const d=await api('/api/v1/admin/dashboard');
     const stats=[
       {label:'卡密总数',value:d.total_licenses,icon:'🔑',color:'blue'},
@@ -384,25 +476,116 @@ async function renderDashboard(){
       {label:'今日验证',value:d.today_verifications,icon:'📡',color:'green'},
       {label:'今日激活',value:d.today_activations,icon:'🚀',color:'blue'},
     ];
-    c.innerHTML=`
-    <div class="stats-grid">${stats.map((s,i)=>`<div class="stat-card ${s.color}" style="animation-delay:${i*.06}s"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div><div class="stat-icon">${s.icon}</div></div>`).join('')}</div>
-    <div class="card" style="animation:slideUp .4s ease .3s backwards">
-      <div class="card-title"><span class="title-icon">📈 卡密状态分布</span></div>
-      <div id="distChart"></div>
-    </div>`;
     const total=d.total_licenses||1;
-    const bars=[
-      {label:'已激活',val:d.active_count,color:'var(--success)'},
-      {label:'未使用',val:d.unused_count,color:'var(--cyan)'},
-      {label:'已过期',val:d.expired_count,color:'var(--warning)'},
-      {label:'已禁用',val:d.disabled_count,color:'var(--danger)'},
+    const segs=[
+      {label:'已激活',val:d.active_count,color:'#10b981'},
+      {label:'未使用',val:d.unused_count,color:'#06b6d4'},
+      {label:'已过期',val:d.expired_count,color:'#f59e0b'},
+      {label:'已禁用',val:d.disabled_count,color:'#ef4444'},
     ];
-    document.getElementById('distChart').innerHTML=bars.map(b=>`
-      <div style="margin-bottom:16px">
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-weight:600;font-size:13px">${b.label}</span><span style="color:var(--text2);font-size:13px">${b.val} (${(b.val/total*100).toFixed(1)}%)</span></div>
-        <div style="height:10px;background:#f1f5f9;border-radius:5px;overflow:hidden"><div style="height:100%;width:${b.val/total*100}%;background:linear-gradient(90deg,${b.color},${b.color}aa);border-radius:5px;animation:barGrow .8s cubic-bezier(.16,1,.3,1);transition:width .3s"></div></div>
-      </div>`).join('');
-  }catch(err){c.innerHTML=`<div class="empty"><div class="empty-icon">⚠️</div>加载失败: ${escapeHtml(err.message)}</div>`}
+    let conicDeg=0;const conicParts=[];
+    segs.forEach(s=>{const pct=s.val/total*100;if(pct>0){conicParts.push(`${s.color} ${conicDeg}deg ${conicDeg+pct*3.6}deg`);conicDeg+=pct*3.6;}});
+    const healthScore=d.total_licenses>0?Math.round(d.active_count/d.total_licenses*100):0;
+    const activityMax=Math.max(d.today_verifications,d.today_activations,1);
+    c.innerHTML=`
+    <div style="display:flex;justify-content:space-between;margin-bottom:16px;align-items:center">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:20px">📊</span><span style="font-size:16px;font-weight:700">数据概览</span>
+        <span style="color:var(--text3);font-size:12px;display:flex;align-items:center;gap:6px;margin-left:8px"><span style="width:8px;height:8px;border-radius:50%;background:var(--success);animation:pulse 2s infinite"></span>实时更新 · 15s</span>
+      </div>
+      <button class="btn btn-default btn-sm" onclick="loadDashboard()">🔄 刷新</button>
+    </div>
+    <div class="stats-grid">${stats.map((s,i)=>`<div class="stat-card ${s.color}" style="animation-delay:${i*.06}s"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div><div class="stat-icon">${s.icon}</div></div>`).join('')}</div>
+    <div class="grid-2" style="margin-bottom:20px">
+      <div class="card" style="animation:slideUp .4s ease .3s backwards">
+        <div class="card-title"><span class="title-icon">🥧 卡密状态分布</span></div>
+        <div style="display:flex;align-items:center;gap:32px;padding:12px 0">
+          <div style="position:relative;width:180px;height:180px;flex-shrink:0">
+            <div style="width:100%;height:100%;border-radius:50%;background:conic-gradient(${conicParts.join(',')||'#f1f5f9 0deg 360deg'});transition:background 1s ease;animation:scaleIn .5s ease .3s backwards"></div>
+            <div style="position:absolute;inset:28px;border-radius:50%;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 2px 8px rgba(0,0,0,.06)">
+              <span style="font-size:32px;font-weight:800;color:var(--primary)">${total}</span>
+              <span style="font-size:12px;color:var(--text3);margin-top:2px">总卡密数</span>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:14px">
+            ${segs.map(s=>{const pct=(s.val/total*100).toFixed(1);return `
+            <div style="display:flex;align-items:center;gap:10px;animation:fadeIn .3s ease backwards">
+              <span style="width:12px;height:12px;border-radius:4px;background:${s.color};box-shadow:0 2px 6px ${s.color}55;flex-shrink:0"></span>
+              <span style="font-weight:600;font-size:13px;flex:1">${s.label}</span>
+              <span style="font-weight:700;font-size:15px;color:${s.color}">${s.val}</span>
+              <span style="color:var(--text3);font-size:12px;width:48px;text-align:right">${pct}%</span>
+            </div>`;}).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="card" style="animation:slideUp .4s ease .35s backwards">
+        <div class="card-title"><span class="title-icon">💚 卡密健康度</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;padding:16px 0">
+          <div style="position:relative;width:140px;height:140px">
+            <svg width="140" height="140" viewBox="0 0 140 140" style="transform:rotate(-90deg)">
+              <circle cx="70" cy="70" r="56" fill="none" stroke="#f1f5f9" stroke-width="12"/>
+              <circle cx="70" cy="70" r="56" fill="none" stroke="url(#healthGrad)" stroke-width="12" stroke-linecap="round"
+                stroke-dasharray="${healthScore*3.519} 999" style="transition:stroke-dasharray 1s cubic-bezier(.16,1,.3,1)"/>
+              <defs><linearGradient id="healthGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+              <span style="font-size:36px;font-weight:800;background:linear-gradient(135deg,#10b981,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${healthScore}</span>
+              <span style="font-size:11px;color:var(--text3)">健康度</span>
+            </div>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:24px">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--success)">${d.active_count}</div><div style="font-size:11px;color:var(--text3)">活跃</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--warning)">${d.expired_count}</div><div style="font-size:11px;color:var(--text3)">过期</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--danger)">${d.disabled_count}</div><div style="font-size:11px;color:var(--text3)">禁用</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card" style="animation:slideUp .4s ease .4s backwards">
+        <div class="card-title"><span class="title-icon">📊 今日活动</span></div>
+        <div style="padding:12px 0">
+          <div style="margin-bottom:20px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:600;font-size:13px;display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:var(--success)"></span>今日验证</span><span style="font-weight:700;color:var(--success)">${d.today_verifications}</span></div>
+            <div style="height:24px;background:#f1f5f9;border-radius:8px;overflow:hidden;position:relative">
+              <div class="act-bar" data-w="${d.today_verifications/activityMax*100}" style="height:100%;width:0;background:linear-gradient(90deg,#10b981,#34d399);border-radius:8px;transition:width 1s cubic-bezier(.16,1,.3,1);position:relative;overflow:hidden">
+                <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);background-size:200% 100%;animation:shimmer 2s infinite"></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:600;font-size:13px;display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:var(--info)"></span>今日激活</span><span style="font-weight:700;color:var(--info)">${d.today_activations}</span></div>
+            <div style="height:24px;background:#f1f5f9;border-radius:8px;overflow:hidden;position:relative">
+              <div class="act-bar" data-w="${d.today_activations/activityMax*100}" style="height:100%;width:0;background:linear-gradient(90deg,#3b82f6,#60a5fa);border-radius:8px;transition:width 1s cubic-bezier(.16,1,.3,1);position:relative;overflow:hidden">
+                <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);background-size:200% 100%;animation:shimmer 2s infinite"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="animation:slideUp .4s ease .45s backwards">
+        <div class="card-title"><span class="title-icon">⚡ 快捷操作</span></div>
+        <div class="grid-2-sm" style="padding:8px 0">
+          <a href="#licenses" style="display:flex;align-items:center;gap:10px;padding:14px;border-radius:var(--radius);background:linear-gradient(135deg,var(--primary-light),transparent);border:1px solid var(--primary-light);transition:all .2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+            <span style="font-size:24px">🔑</span><div><div style="font-weight:600;font-size:13px">卡密管理</div><div style="font-size:11px;color:var(--text3)">生成·编辑·导出</div></div></a>
+          <a href="#products" style="display:flex;align-items:center;gap:10px;padding:14px;border-radius:var(--radius);background:linear-gradient(135deg,var(--success-light),transparent);border:1px solid var(--success-light);transition:all .2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+            <span style="font-size:24px">📦</span><div><div style="font-weight:600;font-size:13px">产品管理</div><div style="font-size:11px;color:var(--text3)">创建·配置</div></div></a>
+          <a href="#sessions" style="display:flex;align-items:center;gap:10px;padding:14px;border-radius:var(--radius);background:linear-gradient(135deg,var(--purple-light),transparent);border:1px solid var(--purple-light);transition:all .2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+            <span style="font-size:24px">🔗</span><div><div style="font-weight:600;font-size:13px">会话管理</div><div style="font-size:11px;color:var(--text3)">在线·监控</div></div></a>
+          <a href="#logs" style="display:flex;align-items:center;gap:10px;padding:14px;border-radius:var(--radius);background:linear-gradient(135deg,var(--warning-light),transparent);border:1px solid var(--warning-light);transition:all .2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+            <span style="font-size:24px">📋</span><div><div style="font-weight:600;font-size:13px">使用日志</div><div style="font-size:11px;color:var(--text3)">查询·分析</div></div></a>
+        </div>
+      </div>
+    </div>`;
+    requestAnimationFrame(()=>{
+      document.querySelectorAll('.act-bar').forEach((bar,i)=>{setTimeout(()=>{bar.style.width=bar.dataset.w+'%'},i*150+100)});
+    });
+    }catch(err){c.innerHTML=`<div class="empty"><div class="empty-icon">⚠️</div>加载失败: ${escapeHtml(err.message)}</div>`}
+  }
+  window.loadDashboard=loadDashboard;
+  loadDashboard();
+  if(dashboardTimer)clearInterval(dashboardTimer);
+  dashboardTimer=setInterval(()=>{if(document.getElementById('content'))loadDashboard()},15000);
 }
 
 /* ===================== Licenses ===================== */
@@ -421,14 +604,15 @@ async function renderLicenses(){
       <span class="title-icon">🔑 卡密列表</span>
       <div style="display:flex;gap:8px">
         <button class="btn btn-primary" onclick="showGenerateModal()">✨ 批量生成</button>
-        <button class="btn btn-default" onclick="exportLicenses()">📥 导出</button>
+        <button class="btn btn-default" onclick="exportLicenses()">📥 导出选中</button>
+        <button class="btn btn-default" onclick="loadLicenses()">🔄 刷新</button>
       </div>
     </div>
     <div class="filter-bar">
       <div class="form-group"><label>产品</label><select id="fProduct" onchange="licenseFilters.product_id=this.value;licenseFilters.page=1;loadLicenses()"><option value="">全部</option>${productCache.map(p=>`<option value="${p.product_id}">${escapeHtml(p.product_name)}</option>`).join('')}</select></div>
       <div class="form-group"><label>状态</label><select id="fStatus" onchange="licenseFilters.status=this.value;licenseFilters.page=1;loadLicenses()"><option value="">全部</option><option value="UNUSED">未使用</option><option value="ACTIVE">已激活</option><option value="EXPIRED">已过期</option><option value="DISABLED">已禁用</option></select></div>
-      <div class="form-group" style="min-width:220px"><label>关键词</label><input type="text" id="fKeyword" placeholder="🔍 卡密/ID/备注" onkeyup="if(event.key==='Enter'){licenseFilters.keyword=this.value;licenseFilters.page=1;loadLicenses()}"></div>
-      <div class="actions"><button class="btn btn-primary btn-sm" onclick="licenseFilters.keyword=document.getElementById('fKeyword').value;licenseFilters.page=1;loadLicenses()">查询</button><button class="btn btn-default btn-sm" onclick="resetLicenseFilters()">重置</button></div>
+      <div class="form-group" style="min-width:220px"><label>关键词</label><input type="text" id="fKeyword" placeholder="🔍 卡密/ID/备注" oninput="clearTimeout(this._t);this._t=setTimeout(()=>{licenseFilters.keyword=this.value;licenseFilters.page=1;loadLicenses()},400)"></div>
+      <div class="actions"><button class="btn btn-default btn-sm" onclick="resetLicenseFilters()">重置</button></div>
     </div>
     <div id="licenseBatchBar" class="hidden" style="display:flex;gap:10px;align-items:center;margin-bottom:14px;padding:12px 16px;background:linear-gradient(90deg,var(--primary-light),transparent);border-radius:var(--radius);border:1px solid var(--primary-light);animation:slideUp .2s ease">
       <span id="selectedCount" style="font-weight:600;color:var(--primary)">已选 0 项</span>
@@ -464,17 +648,18 @@ async function loadLicenses(){
     <div class="table-wrap"><table>
       <thead><tr>
         <th class="checkbox-cell"><input type="checkbox" class="checkbox" id="selectAll" onchange="toggleSelectAll(this.checked)"></th>
-        <th>卡密</th><th>卡密ID</th><th>产品</th><th>时长</th><th>状态</th><th>备注</th><th>创建时间</th><th>激活时间</th><th>到期时间</th><th>操作</th>
+        <th>卡密</th><th>卡密ID</th><th>产品</th><th>时长</th><th>状态</th><th>单机</th><th>备注</th><th>创建时间</th><th>激活时间</th><th>到期时间</th><th>操作</th>
       </tr></thead>
       <tbody>${items.map((l,i)=>`
         <tr style="animation:fadeIn .2s ease ${i*.02}s backwards">
           <td class="checkbox-cell"><input type="checkbox" class="checkbox lic-check" value="${l.license_id}" ${selectedLicenses.has(l.license_id)?'checked':''} onchange="toggleSelect('${l.license_id}',this.checked)"></td>
-          <td class="mono">${escapeHtml(l.license_key)} <span class="copy-btn" onclick="copyText('${escapeHtml(l.license_key)}')">复制</span></td>
-          <td class="mono">${escapeHtml(l.license_id)}</td>
-          <td>${escapeHtml(l.product_id)}</td>
+          <td class="mono ellipsis ellipsis-w-md click-copy" title="${escapeHtml(l.license_key)}" onclick="copyText('${escapeHtml(l.license_key)}','卡密')">${escapeHtml(l.license_key)}</td>
+          <td class="mono ellipsis ellipsis-w-sm click-copy" title="${escapeHtml(l.license_id)}" onclick="copyText('${escapeHtml(l.license_id)}','卡密ID')">${escapeHtml(l.license_id)}</td>
+          <td class="ellipsis ellipsis-w-sm click-copy" title="${escapeHtml(l.product_id)}" onclick="copyText('${escapeHtml(l.product_id)}','产品ID')">${escapeHtml(l.product_id)}</td>
           <td>${l.duration} ${l.duration_unit==='minute'?'分钟':l.duration_unit==='hour'?'小时':'天'}</td>
           <td>${fmtStatus(l.status)}</td>
-          <td>${escapeHtml(l.remark||'-')}</td>
+          <td>${l.bind_machine?'<span class="badge badge-purple">是</span>':'<span class="badge badge-gray">否</span>'}</td>
+          <td class="ellipsis ellipsis-w-md" title="${escapeHtml(l.remark||'-')}">${escapeHtml(l.remark||'-')}</td>
           <td>${fmtDate(l.created_at)}</td>
           <td>${fmtDate(l.activated_at)}</td>
           <td>${fmtDate(l.expire_at)}</td>
@@ -540,11 +725,12 @@ function showGenerateModal(){
       <div class="form-group"><label>单位</label><select id="genUnit"><option value="minute">分钟</option><option value="hour">小时</option><option value="day" selected>天</option></select></div>
     </div>
     <div class="form-group"><label>备注（可选）</label><input type="text" id="genRemark" placeholder="备注信息"></div>
+    <div class="form-group"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="genBindMachine" style="width:16px;height:16px;accent-color:var(--primary)"> 单机绑定（仅允许1台设备使用，支持顶号）</label></div>
     <div class="modal-footer"><button class="btn btn-default" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary" id="genBtn">✨ 生成</button></div>
   </div>`;
   document.body.appendChild(m);m.onclick=e=>{if(e.target===m)m.remove()};
   document.getElementById('genBtn').onclick=async()=>{
-    const body={product_id:document.getElementById('genProduct').value,count:parseInt(document.getElementById('genCount').value),duration:parseInt(document.getElementById('genDuration').value),duration_unit:document.getElementById('genUnit').value,remark:document.getElementById('genRemark').value||null};
+    const body={product_id:document.getElementById('genProduct').value,count:parseInt(document.getElementById('genCount').value),duration:parseInt(document.getElementById('genDuration').value),duration_unit:document.getElementById('genUnit').value,remark:document.getElementById('genRemark').value||null,bind_machine:document.getElementById('genBindMachine').checked};
     if(!body.count||body.count<1){toast('数量必须大于0','error');return}
     if(!body.duration||body.duration<1){toast('有效期必须大于0','error');return}
     try{const btn=document.getElementById('genBtn');btn.disabled=true;btn.textContent='生成中...';const d=await api('/api/v1/admin/licenses/batch-generate',{method:'POST',body:JSON.stringify(body)});m.remove();toast(`成功生成 ${d.count} 个卡密`,'success');loadLicenses();}catch(err){toast(err.message,'error');document.getElementById('genBtn').disabled=false;document.getElementById('genBtn').textContent='✨ 生成'}
@@ -577,11 +763,12 @@ async function showLicenseDetail(id){
   try{const l=await api(`/api/v1/admin/licenses/${id}`);
     document.getElementById('detailBody').innerHTML=`
     <div class="kv-list">
-      <div class="kv-item"><span class="k">卡密</span><span class="v mono">${escapeHtml(l.license_key)} <span class="copy-btn" onclick="copyText('${escapeHtml(l.license_key)}')">复制</span></span></div>
-      <div class="kv-item"><span class="k">卡密ID</span><span class="v mono">${escapeHtml(l.license_id)}</span></div>
-      <div class="kv-item"><span class="k">产品ID</span><span class="v">${escapeHtml(l.product_id)}</span></div>
+      <div class="kv-item"><span class="k">卡密</span><span class="v mono click-copy" onclick="copyText('${escapeHtml(l.license_key)}','卡密')">${escapeHtml(l.license_key)}</span></div>
+      <div class="kv-item"><span class="k">卡密ID</span><span class="v mono click-copy" onclick="copyText('${escapeHtml(l.license_id)}','卡密ID')">${escapeHtml(l.license_id)}</span></div>
+      <div class="kv-item"><span class="k">产品ID</span><span class="v click-copy" onclick="copyText('${escapeHtml(l.product_id)}','产品ID')">${escapeHtml(l.product_id)}</span></div>
       <div class="kv-item"><span class="k">时长</span><span class="v">${l.duration} ${l.duration_unit}</span></div>
       <div class="kv-item"><span class="k">状态</span><span class="v">${fmtStatus(l.status)}</span></div>
+      <div class="kv-item"><span class="k">单机绑定</span><span class="v">${l.bind_machine?'是':'否'}</span></div>
       <div class="kv-item"><span class="k">备注</span><span class="v">${escapeHtml(l.remark||'-')}</span></div>
       <div class="kv-item"><span class="k">创建时间</span><span class="v">${fmtDate(l.created_at)}</span></div>
       <div class="kv-item"><span class="k">激活时间</span><span class="v">${fmtDate(l.activated_at)}</span></div>
@@ -593,7 +780,9 @@ async function showLicenseDetail(id){
 }
 
 async function exportLicenses(){
-  try{const body={format:'csv'};if(licenseFilters.product_id)body.product_id=licenseFilters.product_id;if(licenseFilters.status)body.status=licenseFilters.status;
+  try{const body={format:'csv'};
+    if(selectedLicenses.size>0){body.license_ids=Array.from(selectedLicenses);}
+    else{if(licenseFilters.product_id)body.product_id=licenseFilters.product_id;if(licenseFilters.status)body.status=licenseFilters.status;}
     const d=await api('/api/v1/admin/licenses/export',{method:'POST',body:JSON.stringify(body)});
     const blob=new Blob([d.content],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='licenses.csv';a.click();URL.revokeObjectURL(url);
     toast(`已导出 ${d.count} 条`,'success');
@@ -601,33 +790,49 @@ async function exportLicenses(){
 }
 
 /* ===================== Products ===================== */
+let productKeyword='';
 async function renderProducts(){
   const c=document.getElementById('content');
-  c.innerHTML=`<div class="card"><div class="card-title"><span class="title-icon">📦 产品列表</span><button class="btn btn-primary" onclick="showProductModal()">✨ 创建产品</button></div><div id="productTable">${showLoading()}</div></div>`;
+  c.innerHTML=`<div class="card"><div class="card-title"><span class="title-icon">📦 产品列表</span><button class="btn btn-primary" onclick="showProductModal()">✨ 创建产品</button></div>
+    <div class="filter-bar">
+      <div class="form-group" style="min-width:260px"><label>关键词搜索</label><input type="text" id="pKeyword" placeholder="🔍 产品名称 / 产品ID / 描述 / API Key" value="${escapeHtml(productKeyword)}" oninput="productKeyword=this.value;renderProductTable()"></div>
+      <div class="actions"><button class="btn btn-default btn-sm" onclick="productKeyword='';renderProducts()">重置</button></div>
+    </div>
+    <div id="productTable">${showLoading()}</div></div>`;
   try{
-    const d=await api('/api/v1/admin/products');productCache=d.items||[];const items=productCache;
-    if(items.length===0){document.getElementById('productTable').innerHTML=showEmpty('暂无产品，请点击"创建产品"按钮');return}
-    document.getElementById('productTable').innerHTML=`
-    <div class="table-wrap"><table>
-      <thead><tr><th>产品名称</th><th>产品ID</th><th>API Key</th><th>状态</th><th>描述</th><th>创建时间</th><th>操作</th></tr></thead>
-      <tbody>${items.map((p,i)=>`<tr style="animation:fadeIn .2s ease ${i*.03}s backwards">
-        <td style="font-weight:600">${escapeHtml(p.product_name)}</td>
-        <td class="mono">${escapeHtml(p.product_id)}</td>
-        <td class="mono">${escapeHtml(p.api_key?.slice(0,16))}... <span class="copy-btn" onclick="copyText('${escapeHtml(p.api_key)}')">复制</span></td>
-        <td>${fmtStatus(p.status)}</td>
-        <td>${escapeHtml(p.description||'-')}</td>
-        <td>${fmtDate(p.created_at)}</td>
-        <td><div class="table-actions"><button class="btn btn-default btn-sm" onclick="showProductModal('${p.product_id}')">编辑</button><button class="btn btn-primary btn-sm" onclick="regenKey('${p.product_id}')">重置Key</button></div></td>
-      </tr>`).join('')}</tbody>
-    </table></div>`;
+    const d=await api('/api/v1/admin/products');productCache=d.items||[];
+    renderProductTable();
   }catch(err){document.getElementById('productTable').innerHTML=`<div class="empty"><div class="empty-icon">⚠️</div>加载失败: ${escapeHtml(err.message)}</div>`}
+}
+
+function renderProductTable(){
+  const t=document.getElementById('productTable');if(!t)return;
+  let items=productCache;
+  if(productKeyword){
+    const kw=productKeyword.toLowerCase();
+    items=items.filter(p=>(p.product_name||'').toLowerCase().includes(kw)||(p.product_id||'').toLowerCase().includes(kw)||(p.description||'').toLowerCase().includes(kw)||(p.api_key||'').toLowerCase().includes(kw));
+  }
+  if(items.length===0){t.innerHTML=showEmpty(productKeyword?'未找到匹配的产品':'暂无产品，请点击"创建产品"按钮');return}
+  t.innerHTML=`
+  <div class="table-wrap"><table>
+    <thead><tr><th>产品名称</th><th>产品ID</th><th>API Key</th><th>状态</th><th>描述</th><th>创建时间</th><th>操作</th></tr></thead>
+    <tbody>${items.map((p,i)=>`<tr style="animation:fadeIn .2s ease ${i*.03}s backwards">
+      <td class="ellipsis ellipsis-w-md" title="${escapeHtml(p.product_name)}" style="font-weight:600">${escapeHtml(p.product_name)}</td>
+      <td class="mono ellipsis ellipsis-w-sm click-copy" title="${escapeHtml(p.product_id)}" onclick="copyText('${escapeHtml(p.product_id)}','产品ID')">${escapeHtml(p.product_id)}</td>
+      <td class="mono ellipsis ellipsis-w-md click-copy" title="${escapeHtml(p.api_key||'')}" onclick="copyText('${escapeHtml(p.api_key)}','API Key')">${escapeHtml(p.api_key?.slice(0,16))}...</td>
+      <td>${fmtStatus(p.status)}</td>
+      <td class="ellipsis ellipsis-w-lg" title="${escapeHtml(p.description||'-')}">${escapeHtml(p.description||'-')}</td>
+      <td>${fmtDate(p.created_at)}</td>
+      <td><div class="table-actions"><button class="btn btn-default btn-sm" onclick="showProductModal('${p.product_id}')">编辑</button><button class="btn btn-primary btn-sm" onclick="regenKey('${p.product_id}')">重置Key</button></div></td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
 }
 
 function showProductModal(existingId){
   const p=existingId?productCache.find(x=>x.product_id===existingId):null;
   const m=document.createElement('div');m.className='modal-overlay';
   m.innerHTML=`<div class="modal"><h3>${p?'编辑产品':'创建产品'}</h3>
-    <div class="form-group"><label>产品ID</label><input type="text" id="pId" value="${p?escapeHtml(p.product_id):''}" ${p?'disabled':''} placeholder="字母数字下划线横线"></div>
+    <div class="form-group"><label>产品ID</label><input type="text" id="pId" value="${p?escapeHtml(p.product_id):''}" ${p?'disabled':''} placeholder="字母数字下划线横线，支持中文"></div>
     <div class="form-group"><label>产品名称</label><input type="text" id="pName" value="${p?escapeHtml(p.product_name):''}" placeholder="产品显示名称"></div>
     <div class="form-group"><label>描述</label><textarea id="pDesc">${p?escapeHtml(p.description||''):''}</textarea></div>
     ${p?`<div class="form-group"><label>状态</label><select id="pStatus"><option value="active" ${p.status==='active'?'selected':''}>启用</option><option value="disabled" ${p.status==='disabled'?'selected':''}>禁用</option></select></div>`:''}
@@ -650,10 +855,9 @@ async function renderSessions(){
   const c=document.getElementById('content');if(productCache.length===0)await loadProducts();
   c.innerHTML=`<div class="card"><div class="card-title"><span class="title-icon">🔗 会话列表</span></div>
     <div class="filter-bar">
-      <div class="form-group"><label>卡密ID</label><input type="text" id="sLic" placeholder="精确匹配" onkeyup="if(event.key==='Enter'){sessionFilters.license_id=this.value;sessionFilters.page=1;loadSessions()}"></div>
+      <div class="form-group"><label>卡密ID</label><input type="text" id="sLic" placeholder="精确匹配" oninput="clearTimeout(this._t);this._t=setTimeout(()=>{sessionFilters.license_id=this.value;sessionFilters.page=1;loadSessions()},400)"></div>
       <div class="form-group"><label>产品</label><select id="sProduct" onchange="sessionFilters.product_id=this.value;sessionFilters.page=1;loadSessions()"><option value="">全部</option>${productCache.map(p=>`<option value="${p.product_id}">${escapeHtml(p.product_name)}</option>`).join('')}</select></div>
       <div class="form-group"><label>状态</label><select id="sStatus" onchange="sessionFilters.status=this.value;sessionFilters.page=1;loadSessions()"><option value="">全部</option><option value="active">活跃</option><option value="expired">过期</option><option value="revoked">已撤销</option></select></div>
-      <div class="actions"><button class="btn btn-primary btn-sm" onclick="sessionFilters.license_id=document.getElementById('sLic').value;sessionFilters.page=1;loadSessions()">查询</button></div>
     </div>
     <div id="sessionTable">${showLoading()}</div></div>`;
   loadSessions();
@@ -672,9 +876,9 @@ async function loadSessions(){
     t.innerHTML=`<div class="table-wrap"><table>
       <thead><tr><th>会话ID</th><th>卡密ID</th><th>产品</th><th>机器ID</th><th>IP</th><th>状态</th><th>创建时间</th><th>最后心跳</th><th>到期时间</th></tr></thead>
       <tbody>${items.map((s,i)=>`<tr style="animation:fadeIn .2s ease ${i*.02}s backwards">
-        <td class="mono">${escapeHtml(s.session_id?.slice(0,16))}...</td><td class="mono">${escapeHtml(s.license_id?.slice(0,16))}...</td>
-        <td>${escapeHtml(s.product_id)}</td><td class="mono">${escapeHtml(s.machine_id?.slice(0,20)||'-')}</td>
-        <td>${escapeHtml(s.ip||'-')}</td><td>${fmtStatus(s.status)}</td>
+        <td class="mono ellipsis ellipsis-w-sm click-copy" title="${escapeHtml(s.session_id||'')}" onclick="copyText('${escapeHtml(s.session_id)}','会话ID')">${escapeHtml(s.session_id?.slice(0,16))}...</td><td class="mono ellipsis ellipsis-w-sm click-copy" title="${escapeHtml(s.license_id||'')}" onclick="copyText('${escapeHtml(s.license_id)}','卡密ID')">${escapeHtml(s.license_id?.slice(0,16))}...</td>
+        <td class="ellipsis ellipsis-w-sm click-copy" title="${escapeHtml(s.product_id||'')}" onclick="copyText('${escapeHtml(s.product_id)}','产品ID')">${escapeHtml(s.product_id)}</td><td class="mono ellipsis ellipsis-w-md click-copy" title="${escapeHtml(s.machine_id||'')}" onclick="copyText('${escapeHtml(s.machine_id||'')}','机器ID')">${escapeHtml(s.machine_id?.slice(0,20)||'-')}</td>
+        <td class="ellipsis ellipsis-w-sm" title="${escapeHtml(s.ip||'')}">${escapeHtml(s.ip||'-')}</td><td>${fmtStatus(s.status)}</td>
         <td>${fmtDate(s.created_at)}</td><td>${fmtDate(s.last_seen_at)}</td><td>${fmtDate(s.expire_at)}</td>
       </tr>`).join('')}</tbody></table></div>`;
     const total=d.total,totalPages=Math.ceil(total/sessionFilters.page_size)||1;
@@ -688,11 +892,10 @@ async function renderLogs(){
   const c=document.getElementById('content');if(productCache.length===0)await loadProducts();
   c.innerHTML=`<div class="card"><div class="card-title"><span class="title-icon">📋 使用日志</span><button class="btn btn-default btn-sm" onclick="logFilters={license_id:'',product_id:'',ip:'',machine_id:'',result:'',page:1,page_size:20};renderLogs()">重置</button></div>
     <div class="filter-bar">
-      <div class="form-group"><label>卡密ID</label><input type="text" id="lLic" onkeyup="if(event.key==='Enter'){logFilters.license_id=this.value;logFilters.page=1;loadLogs()}"></div>
+      <div class="form-group"><label>卡密ID</label><input type="text" id="lLic" oninput="clearTimeout(this._t);this._t=setTimeout(()=>{logFilters.license_id=this.value;logFilters.page=1;loadLogs()},400)"></div>
       <div class="form-group"><label>产品</label><select id="lProduct" onchange="logFilters.product_id=this.value;logFilters.page=1;loadLogs()"><option value="">全部</option>${productCache.map(p=>`<option value="${p.product_id}">${escapeHtml(p.product_name)}</option>`).join('')}</select></div>
-      <div class="form-group"><label>IP</label><input type="text" id="lIp" onkeyup="if(event.key==='Enter'){logFilters.ip=this.value;logFilters.page=1;loadLogs()}"></div>
+      <div class="form-group"><label>IP</label><input type="text" id="lIp" oninput="clearTimeout(this._t);this._t=setTimeout(()=>{logFilters.ip=this.value;logFilters.page=1;loadLogs()},400)"></div>
       <div class="form-group"><label>结果</label><select id="lResult" onchange="logFilters.result=this.value;logFilters.page=1;loadLogs()"><option value="">全部</option><option value="SUCCESS">成功</option><option value="FAILED">失败</option></select></div>
-      <div class="actions"><button class="btn btn-primary btn-sm" onclick="logFilters.license_id=document.getElementById('lLic').value;logFilters.ip=document.getElementById('lIp').value;logFilters.page=1;loadLogs()">查询</button></div>
     </div>
     <div id="logTable">${showLoading()}</div></div>`;
   loadLogs();
@@ -713,10 +916,10 @@ async function loadLogs(){
     t.innerHTML=`<div class="table-wrap"><table>
       <thead><tr><th>时间</th><th>动作</th><th>卡密ID</th><th>产品</th><th>IP</th><th>地区</th><th>机器ID</th><th>版本</th><th>结果</th></tr></thead>
       <tbody>${items.map((l,i)=>`<tr style="animation:fadeIn .2s ease ${i*.01}s backwards">
-        <td>${fmtDate(l.request_time)}</td><td><span class="badge badge-blue">${escapeHtml(l.action||'-')}</span></td>
-        <td class="mono">${escapeHtml(l.license_id?.slice(0,16)||'-')}...</td><td>${escapeHtml(l.product_id||'-')}</td>
-        <td>${escapeHtml(l.ip||'-')}</td><td>${escapeHtml([l.country,l.region,l.city].filter(Boolean).join(' / ')||'-')}</td>
-        <td class="mono">${escapeHtml(l.machine_id?.slice(0,20)||'-')}</td><td>${escapeHtml(l.client_version||'-')}</td><td>${fmtStatus(l.result)}</td>
+        <td>${fmtDate(l.request_time)}</td><td><span class="badge badge-blue">${fmtAction(l.action||'-')}</span></td>
+        <td class="mono ellipsis ellipsis-w-sm click-copy" title="${escapeHtml(l.license_id||'')}" onclick="copyText('${escapeHtml(l.license_id||'')}','卡密ID')">${escapeHtml(l.license_id?.slice(0,16)||'-')}...</td><td class="ellipsis ellipsis-w-sm click-copy" title="${escapeHtml(l.product_id||'')}" onclick="copyText('${escapeHtml(l.product_id||'')}','产品ID')">${escapeHtml(l.product_id||'-')}</td>
+        <td class="ellipsis ellipsis-w-sm" title="${escapeHtml(l.ip||'')}">${escapeHtml(l.ip||'-')}</td><td class="ellipsis ellipsis-w-md" title="${escapeHtml([l.country,l.region,l.city].filter(Boolean).join(' / ')||'-')}">${escapeHtml([l.country,l.region,l.city].filter(Boolean).join(' / ')||'-')}</td>
+        <td class="mono ellipsis ellipsis-w-md click-copy" title="${escapeHtml(l.machine_id||'')}" onclick="copyText('${escapeHtml(l.machine_id||'')}','机器ID')">${escapeHtml(l.machine_id?.slice(0,20)||'-')}</td><td class="ellipsis ellipsis-w-sm" title="${escapeHtml(l.client_version||'')}">${escapeHtml(l.client_version||'-')}</td><td>${fmtStatus(l.result)}</td>
       </tr>`).join('')}</tbody></table></div>`;
     const total=d.total,totalPages=Math.ceil(total/logFilters.page_size)||1;
     if(totalPages>1){let btns='';const cur=logFilters.page,start=Math.max(1,cur-2),end=Math.min(totalPages,cur+2);for(let i=start;i<=end;i++)btns+=`<button class="${i===cur?'current':''}" onclick="logFilters.page=${i};loadLogs()">${i}</button>`;const pg=document.createElement('div');pg.className='pagination';pg.innerHTML=`<div class="page-info">共 ${total} 条，第 ${cur}/${totalPages} 页</div><div class="page-btns">${btns}</div>`;t.appendChild(pg);}
@@ -734,10 +937,10 @@ async function renderAdminLogs(){
     document.getElementById('adminLogTable').innerHTML=`<div class="table-wrap"><table>
       <thead><tr><th>时间</th><th>管理员</th><th>动作</th><th>目标类型</th><th>目标ID</th><th>IP</th><th>详情</th><th>结果</th></tr></thead>
       <tbody>${items.map((l,i)=>`<tr style="animation:fadeIn .2s ease ${i*.01}s backwards">
-        <td>${fmtDate(l.created_at)}</td><td style="font-weight:600">${escapeHtml(l.admin_username||'-')}</td>
-        <td><span class="badge badge-purple">${escapeHtml(l.action)}</span></td><td>${escapeHtml(l.target_type||'-')}</td>
-        <td class="mono">${escapeHtml(l.target_id||'-')}</td><td>${escapeHtml(l.ip||'-')}</td>
-        <td class="mono">${escapeHtml(l.details||'-')}</td><td>${fmtStatus(l.result)}</td>
+        <td>${fmtDate(l.created_at)}</td><td style="font-weight:600" class="ellipsis ellipsis-w-sm" title="${escapeHtml(l.admin_username||'')}">${escapeHtml(l.admin_username||'-')}</td>
+        <td><span class="badge badge-purple">${fmtAction(l.action)}</span></td><td class="ellipsis ellipsis-w-sm" title="${escapeHtml(l.target_type||'')}">${escapeHtml(l.target_type==='license'?'卡密':l.target_type==='product'?'产品':l.target_type||'-')}</td>
+        <td class="mono ellipsis ellipsis-w-sm click-copy" title="${escapeHtml(l.target_id||'')}" onclick="copyText('${escapeHtml(l.target_id||'')}','目标ID')">${escapeHtml(l.target_id||'-')}</td><td class="ellipsis ellipsis-w-sm" title="${escapeHtml(l.ip||'')}">${escapeHtml(l.ip||'-')}</td>
+        <td class="mono ellipsis ellipsis-w-lg" title="${escapeHtml(l.details||'')}">${escapeHtml(l.details||'-')}</td><td>${fmtStatus(l.result)}</td>
       </tr>`).join('')}</tbody></table></div>`;
     const total=d.total,totalPages=Math.ceil(total/20)||1;
     if(totalPages>1){let btns='';const cur=adminLogPage,start=Math.max(1,cur-2),end=Math.min(totalPages,cur+2);for(let i=start;i<=end;i++)btns+=`<button class="${i===cur?'current':''}" onclick="adminLogPage=${i};renderAdminLogs()">${i}</button>`;const pg=document.createElement('div');pg.className='pagination';pg.innerHTML=`<div class="page-info">共 ${total} 条，第 ${cur}/${totalPages} 页</div><div class="page-btns">${btns}</div>`;document.getElementById('adminLogTable').appendChild(pg);}

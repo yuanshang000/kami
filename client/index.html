@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>卡密授权 - 测试客户端</title>
+<style>
+:root{--primary:#6366f1;--primary-dark:#4f46e5;--primary-light:#e0e7ff;--success:#10b981;--success-light:#d1fae5;--warning:#f59e0b;--warning-light:#fef3c7;--danger:#ef4444;--danger-light:#fee2e2;--bg:#f0f2f5;--card:#fff;--border:#e2e8f0;--text:#1e293b;--text2:#64748b;--text3:#94a3b8;--radius:12px;--shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);--shadow-md:0 4px 12px rgba(0,0,0,.06);--shadow-lg:0 12px 32px rgba(0,0,0,.1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes ripple{to{transform:scale(4);opacity:0}}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:36px;width:440px;max-width:100%;animation:scaleIn .4s cubic-bezier(.16,1,.3,1)}
+.card h2{font-size:20px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.card .sub{color:var(--text2);font-size:14px;margin-bottom:28px}
+.form-group{margin-bottom:18px}
+.form-group label{display:block;margin-bottom:6px;font-weight:600;font-size:13px}
+.form-group input,.form-group select{width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:8px;font-size:14px;transition:all .2s;background:#f8fafc;font-family:inherit}
+.form-group input:focus,.form-group select:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px var(--primary-light);outline:none}
+.btn{width:100%;padding:12px;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;position:relative;overflow:hidden}
+.btn::after{content:'';position:absolute;width:100%;height:100%;top:0;left:0;background:radial-gradient(circle,rgba(255,255,255,.3) 0,transparent 60%);transform:scale(0);opacity:0;border-radius:50%}
+.btn:active::after{transform:scale(1);opacity:1;animation:ripple .5s ease}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;box-shadow:0 4px 12px rgba(99,102,241,.3)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(99,102,241,.4)}
+.btn-success{background:linear-gradient(135deg,var(--success),#059669);color:#fff}
+.btn-danger{background:linear-gradient(135deg,var(--danger),#dc2626);color:#fff}
+.btn-default{background:#f1f5f9;color:var(--text);border:1px solid var(--border)}
+.btn-default:hover{background:#e2e8f0}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:20px;display:none;animation:fadeIn .2s ease}
+.alert.show{display:block}
+.alert-error{background:var(--danger-light);color:#dc2626;border:1px solid #fecaca}
+.alert-success{background:var(--success-light);color:#059669;border:1px solid #a7f3d0}
+.alert-warning{background:var(--warning-light);color:#d97706;border:1px solid #fde68a}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:8px}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
+.info-row:last-child{border-bottom:none}
+.info-row .k{color:var(--text2);font-size:13px;font-weight:500}
+.info-row .v{font-weight:600;font-size:14px}
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
+.status-active{background:var(--success-light);color:#059669}
+.status-active::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse 2s infinite}
+.status-expired{background:var(--warning-light);color:#d97706}
+.status-error{background:var(--danger-light);color:#dc2626}
+.page{display:none}
+.page.active{display:block;animation:fadeIn .3s ease}
+.config-link{text-align:center;margin-top:16px}
+.config-link a{color:var(--primary);font-size:13px;cursor:pointer;text-decoration:none}
+.config-link a:hover{text-decoration:underline}
+.heartbeat-status{text-align:center;margin-top:16px;font-size:12px;color:var(--text3)}
+.heartbeat-status .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--success);animation:pulse 1.5s infinite;margin-right:6px;vertical-align:middle}
+.countdown{text-align:center;margin-top:12px;font-size:13px;color:var(--text2)}
+.countdown .num{font-size:28px;font-weight:800;color:var(--primary);display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+
+<!-- ========== 配置页 ========== -->
+<div class="page active" id="pageConfig">
+  <div class="card">
+    <h2>⚙️ 客户端配置</h2>
+    <p class="sub">设置服务器地址和产品信息</p>
+    <div class="alert" id="cfgAlert"></div>
+    <div class="form-group">
+      <label>服务器地址</label>
+      <input type="text" id="cfgServer" placeholder="http://localhost:8000" value="http://localhost:8000">
+    </div>
+    <div class="form-group">
+      <label>产品ID</label>
+      <input type="text" id="cfgProductId" placeholder="请输入产品ID">
+    </div>
+    <div class="form-group">
+      <label>API Key</label>
+      <input type="text" id="cfgApiKey" placeholder="app_xxxxxxxx">
+    </div>
+    <div class="form-group">
+      <label>客户端版本</label>
+      <input type="text" id="cfgVersion" placeholder="1.0.0" value="1.0.0">
+    </div>
+    <button class="btn btn-primary" id="cfgSaveBtn">保存配置</button>
+  </div>
+</div>
+
+<!-- ========== 验证页 ========== -->
+<div class="page" id="pageVerify">
+  <div class="card">
+    <h2>🔐 卡密验证</h2>
+    <p class="sub">输入卡密进行授权验证</p>
+    <div class="alert" id="verifyAlert"></div>
+    <div class="form-group">
+      <label>卡密</label>
+      <input type="text" id="licenseKey" placeholder="请输入卡密" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label>机器ID（可选）</label>
+      <input type="text" id="machineId" placeholder="留空则自动生成">
+    </div>
+    <button class="btn btn-primary" id="verifyBtn">验 证</button>
+    <div class="config-link"><a onclick="showPage('pageConfig')">← 返回配置</a></div>
+  </div>
+</div>
+
+<!-- ========== 顶号确认页 ========== -->
+<div class="page" id="pageForce">
+  <div class="card">
+    <h2>⚠️ 设备冲突</h2>
+    <p class="sub">该卡密已在其他设备上使用</p>
+    <div class="alert alert-warning show" id="forceAlert">该卡密已绑定其他设备，是否强制顶号？（原设备将被踢下线）</div>
+    <button class="btn btn-primary" id="forceBtn" style="margin-bottom:10px">确认顶号</button>
+    <button class="btn btn-default" onclick="showPage('pageVerify')">取消</button>
+  </div>
+</div>
+
+<!-- ========== 成功页 ========== -->
+<div class="page" id="pageSuccess">
+  <div class="card">
+    <h2>✅ 验证成功</h2>
+    <p class="sub">卡密授权验证通过</p>
+    <div class="alert alert-success show">授权验证成功，已建立会话连接</div>
+    <div class="info-row"><span class="k">卡密ID</span><span class="v" id="sLicenseId">-</span></div>
+    <div class="info-row"><span class="k">产品ID</span><span class="v" id="sProductId">-</span></div>
+    <div class="info-row"><span class="k">会话ID</span><span class="v" id="sSessionId" style="font-size:12px">-</span></div>
+    <div class="info-row"><span class="k">授权状态</span><span class="v"><span class="status-badge status-active">活跃</span></span></div>
+    <div class="info-row"><span class="k">到期时间</span><span class="v" id="sExpireAt">-</span></div>
+    <div class="countdown"><span class="num" id="countdownNum">--</span>剩余有效时间</div>
+    <div class="heartbeat-status" id="hbStatus"><span class="dot"></span>心跳保持中</div>
+    <div style="margin-top:20px;display:flex;gap:10px">
+      <button class="btn btn-default" id="infoBtn" style="flex:1">查询信息</button>
+      <button class="btn btn-danger" id="deactivateBtn" style="flex:1">注销</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 信息页 ========== -->
+<div class="page" id="pageInfo">
+  <div class="card">
+    <h2>📋 授权详情</h2>
+    <p class="sub">卡密授权完整信息</p>
+    <div class="alert" id="infoAlert"></div>
+    <div id="infoBody"></div>
+    <div style="margin-top:20px;display:flex;gap:10px">
+      <button class="btn btn-default" onclick="showPage('pageSuccess')" style="flex:1">返回</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let cfg={server:'',product_id:'',api_key:'',version:'1.0.0'};
+let sessionData=null;
+let heartbeatTimer=null;
+let countdownTimer=null;
+let pendingVerify=null;
+
+try{const saved=JSON.parse(localStorage.getItem('client_cfg')||'{}');if(saved.server)cfg=saved;}catch(e){}
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showAlert(id,msg,type){
+  const el=document.getElementById(id);el.className='alert alert-'+type+' show';el.textContent=msg;
+}
+
+function hideAlert(id){document.getElementById(id).className='alert';}
+
+function fmtDate(s){if(!s)return '-';const d=new Date(s);if(isNaN(d))return s;return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');}
+
+function fmtCountdown(ms){
+  if(ms<=0)return '已过期';
+  const s=Math.floor(ms/1000),d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60),sec=s%60;
+  if(d>0)return d+'天 '+h+'小时';
+  if(h>0)return h+'小时 '+m+'分';
+  if(m>0)return m+'分 '+sec+'秒';
+  return sec+'秒';
+}
+
+async function apiCall(path,opts={}){
+  const headers={'Content-Type':'application/json','X-API-Key':cfg.api_key,'X-Product-ID':cfg.product_id,'X-Client-Version':cfg.version,...opts.headers};
+  const resp=await fetch(cfg.server+path,{...opts,headers});
+  const data=await resp.json();
+  return data;
+}
+
+function getMachineId(){
+  let mid=document.getElementById('machineId')?.value?.trim();
+  if(!mid){mid=localStorage.getItem('machine_id')||'';}
+  if(!mid){mid='M-'+Math.random().toString(36).slice(2,10)+Date.now().toString(36);localStorage.setItem('machine_id',mid);}
+  return mid;
+}
+
+/* ===== 配置页 ===== */
+function initConfigPage(){
+  document.getElementById('cfgServer').value=cfg.server||'http://localhost:8000';
+  document.getElementById('cfgProductId').value=cfg.product_id||'';
+  document.getElementById('cfgApiKey').value=cfg.api_key||'';
+  document.getElementById('cfgVersion').value=cfg.version||'1.0.0';
+}
+document.getElementById('cfgSaveBtn').onclick=()=>{
+  cfg.server=document.getElementById('cfgServer').value.trim().replace(/\/$/,'');
+  cfg.product_id=document.getElementById('cfgProductId').value.trim();
+  cfg.api_key=document.getElementById('cfgApiKey').value.trim();
+  cfg.version=document.getElementById('cfgVersion').value.trim()||'1.0.0';
+  if(!cfg.server||!cfg.product_id||!cfg.api_key){showAlert('cfgAlert','请填写完整配置信息','error');return;}
+  localStorage.setItem('client_cfg',JSON.stringify(cfg));
+  showAlert('cfgAlert','配置已保存','success');
+  setTimeout(()=>{showPage('pageVerify');hideAlert('cfgAlert');},600);
+};
+
+/* ===== 验证页 ===== */
+document.getElementById('verifyBtn').onclick=async function(){
+  const btn=this;const key=document.getElementById('licenseKey').value.trim();
+  if(!key){showAlert('verifyAlert','请输入卡密','error');return;}
+  if(!cfg.api_key){showAlert('verifyAlert','请先配置API Key','error');setTimeout(()=>showPage('pageConfig'),1000);return;}
+  btn.innerHTML='<span class="spinner"></span>验证中...';btn.disabled=true;hideAlert('verifyAlert');
+  try{
+    const mid=getMachineId();
+    const data=await apiCall('/api/v1/licenses/verify',{method:'POST',body:JSON.stringify({license_key:key,machine_id:mid,client_version:cfg.version})});
+    if(!data.success){throw new Error(data.message||'验证失败');}
+    sessionData=data.data;
+    onVerifySuccess();
+  }catch(e){
+    let msg=e.message||'验证失败';
+    if(e.message&&e.message.includes('顶号')||e.message.includes('bind_machine')||e.message.includes('已绑定')){
+      pendingVerify={key,machine_id:getMachineId()};
+      showPage('pageForce');return;
+    }
+    showAlert('verifyAlert',msg,'error');
+  }finally{btn.innerHTML='验 证';btn.disabled=false;}
+};
+
+/* ===== 顶号页 ===== */
+document.getElementById('forceBtn').onclick=async function(){
+  const btn=this;
+  if(!pendingVerify){showPage('pageVerify');return;}
+  btn.innerHTML='<span class="spinner"></span>顶号中...';btn.disabled=true;
+  try{
+    const data=await apiCall('/api/v1/licenses/verify',{method:'POST',body:JSON.stringify({license_key:pendingVerify.key,machine_id:pendingVerify.machine_id,client_version:cfg.version,force:true})});
+    if(!data.success){throw new Error(data.message||'顶号失败');}
+    sessionData=data.data;pendingVerify=null;
+    onVerifySuccess();
+  }catch(e){showAlert('verifyAlert',e.message||'顶号失败','error');showPage('pageVerify');}
+  finally{btn.innerHTML='确认顶号';btn.disabled=false;}
+};
+
+/* ===== 验证成功 ===== */
+function onVerifySuccess(){
+  document.getElementById('sLicenseId').textContent=sessionData.authorization?.license_id||'-';
+  document.getElementById('sProductId').textContent=sessionData.authorization?.product_id||'-';
+  document.getElementById('sSessionId').textContent=sessionData.session_id||'-';
+  document.getElementById('sExpireAt').textContent=fmtDate(sessionData.expire_at);
+  showPage('pageSuccess');
+  startHeartbeat();startCountdown();
+}
+
+/* ===== 心跳 ===== */
+function startHeartbeat(){
+  if(heartbeatTimer)clearInterval(heartbeatTimer);
+  const hbEl=document.getElementById('hbStatus');
+  heartbeatTimer=setInterval(async()=>{
+    try{
+      const data=await apiCall('/api/v1/licenses/heartbeat',{method:'POST',body:JSON.stringify({session_id:sessionData.session_id,session_token:sessionData.session_token,machine_id:getMachineId(),client_version:cfg.version})});
+      if(!data.success){stopHeartbeat();hbEl.innerHTML='<span style="color:var(--danger)">●</span> 心跳失败: '+(data.message||'');}
+    }catch(e){stopHeartbeat();hbEl.innerHTML='<span style="color:var(--danger)">●</span> 心跳断开';}
+  },30000);
+}
+
+function stopHeartbeat(){if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}}
+
+/* ===== 倒计时 ===== */
+function startCountdown(){
+  if(countdownTimer)clearInterval(countdownTimer);
+  const update=()=>{
+    if(!sessionData?.expire_at){return;}
+    const remain=new Date(sessionData.expire_at).getTime()-Date.now();
+    document.getElementById('countdownNum').textContent=fmtCountdown(remain);
+    if(remain<=0){stopHeartbeat();stopCountdown();showPage('pageVerify');showAlert('verifyAlert','卡密已过期','warning');}
+  };
+  update();countdownTimer=setInterval(update,1000);
+}
+
+function stopCountdown(){if(countdownTimer){clearInterval(countdownTimer);countdownTimer=null;}}
+
+/* ===== 注销 ===== */
+document.getElementById('deactivateBtn').onclick=async function(){
+  const btn=this;btn.innerHTML='<span class="spinner"></span>注销中...';btn.disabled=true;
+  try{
+    await apiCall('/api/v1/licenses/deactivate',{method:'POST',body:JSON.stringify({session_id:sessionData.session_id,session_token:sessionData.session_token})});
+  }catch(e){}
+  stopHeartbeat();stopCountdown();sessionData=null;
+  showPage('pageVerify');showAlert('verifyAlert','已注销','success');
+  btn.innerHTML='注销';btn.disabled=false;
+};
+
+/* ===== 查询信息 ===== */
+document.getElementById('infoBtn').onclick=async function(){
+  const btn=this;btn.innerHTML='<span class="spinner"></span>查询中...';btn.disabled=true;
+  try{
+    const data=await apiCall('/api/v1/licenses/info',{method:'POST',body:JSON.stringify({session_id:sessionData.session_id,session_token:sessionData.session_token})});
+    hideAlert('infoAlert');
+    if(!data.success){throw new Error(data.message||'查询失败');}
+    const a=data.data.authorization||{};
+    const rows=[
+      ['授权版本','v'+a.version],['卡密ID',a.license_id],['产品ID',a.product_id],
+      ['授权状态',a.status],['签发时间',fmtDate(new Date(a.issued_at*1000).toISOString())],
+      ['到期时间',fmtDate(new Date(a.expire_at*1000).toISOString())],
+      ['服务器时间',fmtDate(new Date(a.server_time*1000).toISOString())],
+      ['会话ID',a.session_id],['随机数',a.nonce],
+    ];
+    document.getElementById('infoBody').innerHTML=rows.map(r=>`<div class="info-row"><span class="k">${r[0]}</span><span class="v" style="font-size:12px;max-width:260px;overflow:hidden;text-overflow:ellipsis" title="${r[1]}">${r[1]}</span></div>`).join('');
+    showPage('pageInfo');
+  }catch(e){showAlert('infoAlert',e.message||'查询失败','error');}
+  finally{btn.innerHTML='查询信息';btn.disabled=false;}
+};
+
+/* ===== 初始化 ===== */
+initConfigPage();
+if(cfg.server&&cfg.product_id&&cfg.api_key){showPage('pageVerify');}
+</script>
+</body>
+</html>

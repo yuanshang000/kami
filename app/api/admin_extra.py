@@ -16,6 +16,7 @@ from app.models import AdminLog, AdminUser, License, Product, Session as Session
 from app.schemas.product import ProductCreate, ProductUpdate
 from app.schemas.response import success_response
 from app.services import admin_log_service
+from app.services.license_service import auto_expire
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
@@ -183,6 +184,7 @@ def list_sessions(
     admin: AdminUser = Depends(get_current_admin),
     request_id: str = Depends(get_request_id),
 ):
+    auto_expire(db)
     q = db.query(SessionModel)
     if license_id:
         q = q.filter_by(license_id=license_id)
@@ -313,6 +315,7 @@ def dashboard(
     request_id: str = Depends(get_request_id),
 ):
     now = utc_now()
+    auto_expire(db)
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     total = db.query(License).count()
     unused = db.query(License).filter_by(status="UNUSED").count()
