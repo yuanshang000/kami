@@ -76,7 +76,9 @@ kami/
 │   └── setup_client_demo.py       生成客户端演示数据
 │
 ├── tests/                  pytest 测试
-└── docs/                   接口文档与接入说明
+├── docs/                   接口文档与接入说明
+├── 开发文档.md              完整开发文档
+└── 宝塔面板安装.txt          宝塔面板部署步骤
 ```
 
 ---
@@ -232,9 +234,9 @@ Docker：
 docker-compose up -d
 ```
 
-生产环境务必修改 `.env` 中的 `JWT_SECRET` 和 `ADMIN_DEFAULT_PASSWORD`，并确保 Redis 可用（否则限流失效）。
+宝塔面板部署步骤见 [宝塔面板安装.txt](宝塔面板安装.txt)。
 
-也可以直接用 uvicorn 部署，或在宝塔面板等环境里用 Python 项目管理器托管。
+生产环境务必修改 `.env` 中的 `JWT_SECRET` 和 `ADMIN_DEFAULT_PASSWORD`，并确保 Redis 可用（否则限流失效）。
 
 ---
 
@@ -264,3 +266,4 @@ docker-compose up -d
 - [客户端 UI 模板文档](client/template/README.md) — 接入方看这份
 - [接口文档](docs/api.md)
 - [客户端接入说明](docs/client-integration.md)
+- [开发文档](开发文档.md) — 系统设计、数据库结构、错误码等完整细节
