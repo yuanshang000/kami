@@ -63,26 +63,51 @@ def create_admin_token(admin: AdminUser) -> str:
 
 
 def decode_admin_token(token: str) -> dict:
+    """解析管理员 JWT。
+
+    区分「已过期」与「非法 token」：过期统一抛 SESSION_EXPIRED(4010)，
+    前端据此跳转登录页并提示重新登录；签名/格式问题抛 INVALID_SESSION(4009)。
+    """
     from jose import jwt, JWTError
+    from jose.exceptions import ExpiredSignatureError
     try:
         return jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+    except ExpiredSignatureError as exc:
+        raise LicenseError(ErrorCode.SESSION_EXPIRED, "登录已过期，请重新登录") from exc
     except JWTError as exc:
-        raise LicenseError(ErrorCode.INVALID_SESSION) from exc
+        raise LicenseError(ErrorCode.INVALID_SESSION, "登录状态无效，请重新登录") from exc
+
+
+def _extract_bearer(authorization: Optional[str]) -> str:
+    if not authorization:
+        raise LicenseError(ErrorCode.SESSION_EXPIRED, "未登录或登录已过期，请重新登录")
+    parts = authorization.split(" ", 1)
+    if len(parts) != 2 or parts[0].lower() != "bearer" or not parts[1].strip():
+        raise LicenseError(ErrorCode.SESSION_EXPIRED, "登录凭证格式错误，请重新登录")
+    return parts[1].strip()
 
 
 def get_current_admin(
     db: Session = Depends(get_db),
     authorization: Optional[str] = Header(None),
 ) -> AdminUser:
-    if not authorization:
-        raise LicenseError(ErrorCode.INVALID_API_KEY, "missing admin token")
-    parts = authorization.split(" ", 1)
-    if len(parts) != 2 or parts[0].lower() != "bearer":
-        raise LicenseError(ErrorCode.INVALID_API_KEY, "invalid admin token format")
-    token = parts[1].strip()
-    payload = decode_admin_token(token)
-    admin_id = int(payload.get("sub", 0))
+    payload = decode_admin_token(_extract_bearer(authorization))
+    admin_id = int(payload.get("sub", 0) or 0)
     admin = db.query(AdminUser).filter_by(id=admin_id, status="active").first()
     if admin is None:
-        raise LicenseError(ErrorCode.INVALID_SESSION)
+        raise LicenseError(ErrorCode.INVALID_SESSION, "账号不存在或已被禁用")
     return admin
+
+
+def get_admin_token_payload(
+    db: Session = Depends(get_db),
+    authorization: Optional[str] = Header(None),
+) -> dict:
+    """校验 token 并返回 JWT 载荷 + admin 对象，供会话状态接口使用。"""
+    payload = decode_admin_token(_extract_bearer(authorization))
+    admin_id = int(payload.get("sub", 0) or 0)
+    admin = db.query(AdminUser).filter_by(id=admin_id, status="active").first()
+    if admin is None:
+        raise LicenseError(ErrorCode.INVALID_SESSION, "账号不存在或已被禁用")
+    payload["admin"] = admin
+    return payload

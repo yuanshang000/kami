@@ -62,6 +62,8 @@ input,select,textarea{font-family:inherit;outline:none}
 .login-card .btn-login:hover{transform:translateY(-2px);box-shadow:0 8px 20px var(--primary-glow)}
 .login-card .btn-login:active{transform:translateY(0)}
 .login-error{color:var(--danger);text-align:center;margin-top:12px;font-size:13px;min-height:18px;transition:all .2s}
+.login-notice{display:none;align-items:flex-start;gap:8px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);color:#b45309;border-radius:var(--radius);padding:10px 12px;font-size:13px;line-height:1.5;margin-bottom:18px;text-align:left}
+.login-notice.show{display:flex;animation:slideUp .3s ease}
 
 /* ===== Layout ===== */
 .app{display:flex;min-height:100vh}
@@ -302,20 +304,132 @@ table .checkbox-cell{width:44px}
 const API_BASE='';
 let token=localStorage.getItem('admin_token');
 let adminUser=JSON.parse(localStorage.getItem('admin_user')||'null');
+let tokenExp=0;            // 当前 token 过期时间戳（毫秒）
+let expiryTimer=null;      // 到期自动续期/登出的定时器
+let refreshPromise=null;   // 并发续期去重
+let redirecting=false;     // 防止重复跳转登录页
+let loginNotice='';        // 登录页顶部提示（如会话过期）
+
+/* ===================== Session ===================== */
+const SESSION_CODES=new Set([4006,4009,4010]);   // API Key无效/会话无效/会话过期
+
+function decodeJwtExp(t){
+  try{
+    const p=t.split('.')[1];
+    const json=decodeURIComponent(atob(p.replace(/-/g,'+').replace(/_/g,'/')).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+    const payload=JSON.parse(json);
+    return payload.exp?payload.exp*1000:0;
+  }catch(e){return 0}
+}
+
+function clearSession(){
+  token=null;adminUser=null;tokenExp=0;
+  localStorage.removeItem('admin_token');
+  localStorage.removeItem('admin_user');
+  if(expiryTimer){clearTimeout(expiryTimer);expiryTimer=null}
+  if(dashboardTimer){clearInterval(dashboardTimer);dashboardTimer=null}
+}
+
+/** 会话失效：清理本地状态并跳转登录页提示重新登录 */
+function sessionExpired(msg='登录会话已过期，请重新登录后继续使用'){
+  if(redirecting)return;
+  redirecting=true;
+  clearSession();
+  loginNotice=msg||'登录会话已过期，请重新登录后继续使用';
+  location.hash='';
+  handleRoute();
+  setTimeout(()=>{redirecting=false},300);
+}
+
+/** 主动续期：token 剩余不足 5 分钟时静默换新，避免用户被动掉线 */
+async function ensureFreshToken(){
+  if(!token||!tokenExp)return true;
+  if(tokenExp-Date.now()>5*60*1000)return true;
+  if(refreshPromise)return refreshPromise;
+  refreshPromise=(async()=>{
+    try{
+      // skipRefresh 防止递归；skipAuthRedirect 交由外层统一处理会话失效
+      const d=await api('/api/v1/admin/auth/refresh',{method:'POST',skipRefresh:true});
+      token=d.token;tokenExp=d.expires_at?d.expires_at*1000:decodeJwtExp(token);
+      localStorage.setItem('admin_token',token);
+      scheduleExpiryWatch();
+      return true;
+    }catch(e){return false}
+    finally{refreshPromise=null}
+  })();
+  return refreshPromise;
+}
+
+/** 定时器：到期前 5 分钟尝试续期，续期失败或已过期则跳转登录页 */
+function scheduleExpiryWatch(){
+  if(expiryTimer)clearTimeout(expiryTimer);
+  if(!token||!tokenExp)return;
+  const check=async()=>{
+    if(!token||!tokenExp){expiryTimer=null;return}
+    if(tokenExp-Date.now()<=0){sessionExpired();return}
+    const ok=await ensureFreshToken();
+    if(!ok&&tokenExp-Date.now()<=0)sessionExpired();
+    else scheduleExpiryWatch();
+  };
+  const wait=Math.max(1000,tokenExp-Date.now()-5*60*1000);
+  expiryTimer=setTimeout(check,wait);
+}
+
+/** 页面可见性/焦点恢复时校验 token，标签页长时间挂起后立即发现过期 */
+function bindSessionWatchers(){
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible'&&token)checkSessionAlive();
+  });
+  window.addEventListener('focus',()=>{if(token)checkSessionAlive()});
+}
+
+async function checkSessionAlive(){
+  if(!token)return false;
+  if(tokenExp&&tokenExp<=Date.now()){sessionExpired();return false}
+  try{
+    await api('/api/v1/admin/auth/session',{skipRefresh:true});
+    if(tokenExp&&tokenExp-Date.now()<5*60*1000)await ensureFreshToken();
+    return true;
+  }catch(e){
+    // token 已失效（密钥变更/账号禁用/过期）：api 内部已跳转登录页
+    return false;
+  }
+}
 
 /* ===================== Utils ===================== */
 async function api(path,opts={}){
+  if(!opts.skipRefresh)await ensureFreshToken();
   const headers={'Content-Type':'application/json',...opts.headers};
   if(token)headers['Authorization']='Bearer '+token;
+  let resp,data;
   try{
-    const resp=await fetch(API_BASE+path,{...opts,headers});
-    const data=await resp.json();
-    if(!resp.ok||!data.success){throw new Error(data.message||data.error?.type||'请求失败');}
-    return data.data;
+    resp=await fetch(API_BASE+path,{...opts,headers});
   }catch(e){
-    if(e.message==='Unexpected end of JSON input')throw new Error('网络错误');
-    throw e;
+    throw new Error('网络连接失败，请检查网络后重试');
   }
+  try{
+    data=await resp.json();
+  }catch(e){
+    if(resp.status===401&&!opts.skipAuthRedirect){sessionExpired();throw new Error('登录会话已过期，请重新登录')}
+    throw new Error('Unexpected end of JSON input');
+  }
+  if(!resp.ok||!data.success){
+    const code=data.code;
+    // 会话类错误（401/4009/4010）统一跳转登录页，登录接口自身除外
+    if(SESSION_CODES.has(code)||resp.status===401){
+      const isLoginReq=path.includes('/auth/login');
+      if(!isLoginReq&&!opts.skipAuthRedirect){
+        sessionExpired(code===4010?'登录会话已过期，请重新登录后继续使用':'登录状态已失效，请重新登录');
+      }
+      const err=new Error(data.message||'登录会话已过期，请重新登录');
+      err.code=code;err.status=resp.status;
+      throw err;
+    }
+    const err=new Error(data.message||data.error?.type||'请求失败');
+    err.code=code;err.status=resp.status;
+    throw err;
+  }
+  return data.data;
 }
 
 function toast(msg,type='info'){
@@ -356,6 +470,8 @@ function navigate(hash){location.hash=hash;}
 function handleRoute(){
   if(dashboardTimer){clearInterval(dashboardTimer);dashboardTimer=null}
   if(!token){renderLogin();return}
+  if(!tokenExp)tokenExp=decodeJwtExp(token);
+  if(tokenExp&&tokenExp<=Date.now()){sessionExpired();return}
   let hash=location.hash.slice(1)||'dashboard';
   const route=routes[hash];
   if(!route){hash='dashboard';}
@@ -365,14 +481,19 @@ window.addEventListener('hashchange',handleRoute);
 
 /* ===================== Login ===================== */
 function renderLogin(){
+  if(dashboardTimer){clearInterval(dashboardTimer);dashboardTimer=null}
+  if(expiryTimer){clearTimeout(expiryTimer);expiryTimer=null}
   let particles='';
   for(let i=0;i<12;i++){const s=20+Math.random()*40;particles+=`<div class="login-particle" style="width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*4}s;animation-duration:${4+Math.random()*4}s"></div>`}
+  const notice=loginNotice;
+  loginNotice='';
   document.getElementById('app').innerHTML=`
   <div class="login-wrap">${particles}
     <div class="login-card">
       <div class="login-logo">🔐</div>
       <h1>License Server</h1>
       <p class="sub">卡密授权管理后台</p>
+      ${notice?`<div class="login-notice show" id="loginNotice"><span>⚠️</span><span>${escapeHtml(notice)}</span></div>`:''}
       <form id="loginForm">
         <div class="form-group">
           <label>用户名</label>
@@ -392,13 +513,21 @@ function renderLogin(){
     const username=document.getElementById('loginUser').value.trim();
     const password=document.getElementById('loginPass').value.trim();
     if(!username||!password){document.getElementById('loginError').textContent='请输入用户名和密码';return}
+    const btn=document.querySelector('.btn-login');
+    btn.disabled=true;btn.textContent='登录中...';
     try{
       const data=await api('/api/v1/admin/auth/login',{method:'POST',body:JSON.stringify({username,password})});
       token=data.token;adminUser={username:data.username,role:data.role};
+      tokenExp=data.expires_at?data.expires_at*1000:decodeJwtExp(token);
       localStorage.setItem('admin_token',token);
       localStorage.setItem('admin_user',JSON.stringify(adminUser));
+      loginNotice='';
+      scheduleExpiryWatch();
       handleRoute();
-    }catch(err){document.getElementById('loginError').textContent=err.message}
+    }catch(err){
+      document.getElementById('loginError').textContent=err.message;
+      btn.disabled=false;btn.textContent='登 录';
+    }
   };
 }
 
@@ -451,9 +580,9 @@ function renderLayout(activeHash){
   document.getElementById('userInfo').onclick=(e)=>{e.stopPropagation();document.getElementById('userDropdown').classList.toggle('hidden');};
   document.addEventListener('click',()=>document.getElementById('userDropdown')?.classList.add('hidden'));
   document.getElementById('logoutBtn').onclick=async()=>{
-    try{await api('/api/v1/admin/auth/logout',{method:'POST'})}catch(e){}
-    token=null;adminUser=null;
-    localStorage.removeItem('admin_token');localStorage.removeItem('admin_user');
+    try{await api('/api/v1/admin/auth/logout',{method:'POST',skipAuthRedirect:true})}catch(e){}
+    clearSession();
+    loginNotice='';
     renderLogin();
   };
   route.render();
@@ -978,7 +1107,10 @@ async function renderSettings(){
 }
 
 /* ===================== Init ===================== */
+if(token)tokenExp=decodeJwtExp(token);
+bindSessionWatchers();
 handleRoute();
+if(token)scheduleExpiryWatch();
 </script>
 </body>
 </html>

@@ -4,7 +4,13 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
-from app.api.deps import create_admin_token, get_current_admin, get_request_id
+from app.api.deps import (
+    create_admin_token,
+    get_admin_token_payload,
+    get_current_admin,
+    get_request_id,
+)
+from app.core.config import settings
 from app.core.ip import get_client_ip
 from app.core.security import verify_password
 from app.core.time_utils import utc_now, utc_now_ts
@@ -39,9 +45,42 @@ def login(
         "token": token,
         "username": admin.username,
         "role": admin.role,
-        "expires_at": utc_now_ts() + 480 * 60,
+        "expires_at": utc_now_ts() + settings.jwt_expire_minutes * 60,
     }
     return success_response(data, request_id)
+
+
+@router.get("/session")
+def session_info(
+    payload: dict = Depends(get_admin_token_payload),
+    request_id: str = Depends(get_request_id),
+):
+    """会话状态接口：前端启动/定时调用校验本地 token 是否仍然有效。"""
+    admin = payload["admin"]
+    return success_response(
+        {
+            "username": admin.username,
+            "role": admin.role,
+            "issued_at": payload.get("iat"),
+            "expires_at": payload.get("exp"),
+        },
+        request_id,
+    )
+
+
+@router.post("/refresh")
+def refresh_token(
+    request: Request,
+    payload: dict = Depends(get_admin_token_payload),
+    request_id: str = Depends(get_request_id),
+):
+    """续期接口：token 仍有效时签发新 token，避免用户被动掉线。"""
+    admin = payload["admin"]
+    token = create_admin_token(admin)
+    return success_response(
+        {"token": token, "expires_at": utc_now_ts() + settings.jwt_expire_minutes * 60},
+        request_id,
+    )
 
 
 @router.post("/logout")
